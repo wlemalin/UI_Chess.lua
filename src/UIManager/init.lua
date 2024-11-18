@@ -1,10 +1,9 @@
 local UIManager = {}
--- local PieceSelection = require("src.UIManager.PieceSelection")
 
 function UIManager:initialize()
     self.selectedPiece = nil
     self.pieceSelection = require("src.UIManager.PieceSelection")
-    self.pieceSelection:initialize(self) -- Passer l'instance de UIManager
+    self.pieceSelection:initialize(self)
 end
 
 

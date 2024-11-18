@@ -6,13 +6,11 @@ local PieceMover = require("src.PieceManager.PieceMover")
 
 
 function PieceManager:initialize()
-    -- Initialiser les pièces avec leur position et images
     self.pieces = PieceInitializer:initializePieces()
     PieceRenderer:initializeImages()
 end
 
 function PieceManager:drawPieces()
-    -- Déléguer le rendu des pièces au module `PieceRenderer`
     PieceRenderer:drawPieces(self.pieces)
 end
 

@@ -1,11 +1,11 @@
 local PieceMover = {}
-local PieceInitializer = require("src.PieceManager.PieceInitializer") -- Si nécessaire pour récupérer les pièces
+local PieceInitializer = require("src.PieceManager.PieceInitializer")
 
 
 function PieceMover:isValidMove(pieces, piece, destinationIndex)
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
     if targetPiece and targetPiece.color == piece.color then
-        return false -- Mouvement invalide : destination occupée par une pièce alliée
+        return false -- Mouvement invalide : occupée par pièce alliée
     end
 
   if piece.type == "pawn" then
@@ -36,35 +36,34 @@ function PieceMover:isValidMove(pieces, piece, destinationIndex)
 end
 
 function PieceMover:movePiece(pieces, piece, destinationIndex)
-    -- Valider le mouvement
     print(pieces, destinationIndex)
     if not self:isValidMove(pieces, piece, destinationIndex) then
         return false
     end
 
-    -- Vérifier si une pièce ennemie se trouve sur la case cible
+    -- Check if target square is occupied
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
     if targetPiece and targetPiece.color ~= piece.color then
         self:capturePiece(pieces, piece.index, destinationIndex)
     end
 
-    -- Déplacer normalement si aucune capture
+    -- Actual move
     piece.index = destinationIndex
-    return true -- Mouvement réussi
+    return true
 end
 
 
 
 function PieceMover:capturePiece(pieces, fromIndex, toIndex)
-    -- Trouver la pièce à capturer
+    -- Find the piece to capture
     for i, piece in ipairs(pieces) do
         if piece.index == toIndex then
-            table.remove(pieces, i) -- Supprimer la pièce capturée
+            table.remove(pieces, i) -- Remove it
             break
         end
     end
 
-    -- Trouver la pièce attaquante et la déplacer
+    -- Find attacker and move it
     for _, piece in ipairs(pieces) do
         if piece.index == fromIndex then
             piece.index = toIndex -- Déplacer la pièce attaquante
@@ -76,18 +75,18 @@ end
 
 function PieceMover:isValidPawnMove(pieces, piece, targetIndex)
     local startIndex = piece.index
-    -- Détermine la direction en fonction de la couleur
+    -- Determine direction using color
     local direction = (piece.color == "white") and 1 or -1
     print(startIndex, targetIndex)
 
-    -- Déplacement simple
+    -- Move 1 square up
     if targetIndex == startIndex + (24 * direction) then
         if not PieceInitializer:getPieceAtIndex(pieces, targetIndex) then
             return true
         end
     end
 
-    -- Déplacement double depuis la rangée de départ
+    -- Move 2 squares up
     local startRow = math.floor((startIndex - 1) / 24) + 1
     if targetIndex == startIndex + (48 * direction) and
        ((piece.color == "white" and startRow == 2) or (piece.color == "black" and startRow == 7)) then
@@ -97,22 +96,21 @@ function PieceMover:isValidPawnMove(pieces, piece, targetIndex)
         end
     end
 
-    -- Prise en diagonale gauche
+    -- Normal take (left)
     if targetIndex == startIndex + (23 * direction) then
         local targetPiece = PieceInitializer:getPieceAtIndex(pieces, targetIndex)
         if targetPiece and targetPiece.color ~= piece.color then
-            return true -- Prise normale
+            return true
         end
 
     end
 
-    -- Prise en diagonale droite
+    -- Normal take (right)
     if targetIndex == startIndex + (25 * direction) then
         local targetPiece = PieceInitializer:getPieceAtIndex(pieces, targetIndex)
         if targetPiece and targetPiece.color ~= piece.color then
-            return true -- Prise normale
+            return true
         end
-
     end
     return false
 end
@@ -121,80 +119,70 @@ function PieceMover:isValidKnightMove(pieces, piece, destinationIndex)
     local knightMoves = {49, 47, 26, 22}
     local startIndex = piece.index
 
-    -- Vérifie si la destination correspond à un mouvement valide du cavalier
     for _, move in ipairs(knightMoves) do
         if destinationIndex == startIndex + move or destinationIndex == startIndex - move then
-            -- Vérifie si la case cible contient une pièce alliée
-            print(destinationIndex, "from", startIndex)
             local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
             if not targetPiece or targetPiece.color ~= piece.color then
-                return true -- Mouvement valide
+                return true
             end
         end
     end
 
-    return false -- Aucun mouvement valide trouvé
+    return false
 end
 
 function PieceMover:isValidBishopMove(pieces, piece, destinationIndex)
     local startIndex = piece.index
-
-    -- Détermine le pas (step) correspondant à la diagonale choisie
     local delta = destinationIndex - startIndex
 
-    -- Vérifie si le mouvement est bien diagonal (delta doit être divisible par un pas valide)
     local step = nil
     if math.abs(delta) % 23 == 0 then
         step = 23
     elseif math.abs(delta) % 25 == 0 then
         step = 25
     else
-        return false -- Mouvement non diagonal
+        return false -- Non diagonal move
     end
 
-    -- Parcourt la diagonale correspondant au mouvement
-    local direction = step * (delta > 0 and 1 or -1) -- Direction basée sur le signe de delta
+    -- Move on the diagonale
+    local direction = step * (delta > 0 and 1 or -1)
     local currentIndex = startIndex + direction
 
     while currentIndex ~= destinationIndex do
-        -- Vérifie s'il y a une pièce bloquant le chemin
         local blockingPiece = PieceInitializer:getPieceAtIndex(pieces, currentIndex)
         if blockingPiece then
-            return false -- Chemin bloqué avant d'atteindre la destination
+            return false -- Path is obstructed
         end
-        currentIndex = currentIndex + direction -- Avance d'une étape dans la diagonale
+        currentIndex = currentIndex + direction -- One square in diagonal
     end
 
-    -- Vérifie la case de destination
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
     if not targetPiece or targetPiece.color ~= piece.color then
-        return true -- Mouvement valide (destination vide ou pièce ennemie)
+        return true -- Valid move
     else
-        return false -- Mouvement invalide (pièce alliée à destination)
+        return false
     end
 end
 
 function PieceMover:isValidRookMove(pieces, piece, destinationIndex)
     local startIndex = piece.index
-
-    -- Calcul de la différence entre la destination et le départ
     local delta = destinationIndex - startIndex
 
-    -- Vérifie si le mouvement est horizontal ou vertical
+    -- Check if horizontal or vertical
     local step = nil
     if delta % 24 == 0 then
-        step = 24 -- Mouvement vertical (dans la même colonne)
+        step = 24 -- vertical
     elseif math.abs(delta) < 7 then
-        step = 1 -- Mouvement horizontal (dans la même ligne)
+        step = 1 -- horizontal
     else
-        return false -- Mouvement invalide (ni horizontal ni vertical)
+        return false -- Invalid move
     end
 
-    -- Détermine la direction (1 pour avancer, -1 pour reculer)
+    -- Direction
     local direction = step * (delta > 0 and 1 or -1)
     local currentIndex = startIndex + direction
 
-    -- Parcourt les cases intermédiaires
+    -- Travel the path
     while currentIndex ~= destinationIndex do
         local blockingPiece = PieceInitializer:getPieceAtIndex(pieces, currentIndex)
         if blockingPiece then
@@ -203,12 +191,11 @@ function PieceMover:isValidRookMove(pieces, piece, destinationIndex)
         currentIndex = currentIndex + direction -- Avance d'une étape
     end
 
-    -- Vérifie la case de destination
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
     if not targetPiece or targetPiece.color ~= piece.color then
-        return true -- Mouvement valide (destination vide ou pièce ennemie)
+        return true
     else
-        return false -- Mouvement invalide (pièce alliée à destination)
+        return false
     end
 end
 
@@ -220,7 +207,6 @@ function PieceMover:isValidKingMove(pieces, piece, destinationIndex)
     local startIndex = piece.index
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
 
-    -- Vérifie si la case destination est occupée par une pièce alliée
     if targetPiece ~= nil and targetPiece.color == piece.color then
         return false
     end

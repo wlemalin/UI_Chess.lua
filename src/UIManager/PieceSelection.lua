@@ -47,7 +47,7 @@ function PieceSelection:getClickedIndex(mouseX, mouseY)
     local col = math.floor(mouseX / squareSize) + playableStart
     local row = math.floor(mouseY / squareSize) + 1
 
-    -- Vérifier si la case est dans les limites jouables
+    -- Verify index is in acceptable range
     if col >= playableStart and col <= playableEnd and row >= 1 and row <= rows then
         return (row - 1) * columns + col -- Calculer l'index linéaire
     end
