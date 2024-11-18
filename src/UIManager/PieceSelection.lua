@@ -2,21 +2,21 @@ local PieceSelection = {}
 local constants = require("src.constants")
 
 local squareSize = constants.squareSize
-local PLAYABLE_START = constants.PLAYABLE_START
-local PLAYABLE_END = constants.PLAYABLE_END
-local ROWS = constants.ROWS
-local COLUMNS = constants.COLUMNS
+local playableStart = constants.playableStart
+local playableEnd = constants.playableEnd
+local rows = constants.rows
+local columns = constants.columns
 
 function PieceSelection:initialize(uiManager)
-    self.UIManager = uiManager -- Stocker l'instance si nécessaire
+    self.UIManager = uiManager
 end
 
 function PieceSelection:getClickedPiece(pieces, mouseX, mouseY)
     for _, piece in ipairs(pieces) do
         local row = math.floor((piece.index - 1) / 24) + 1
         local col = (piece.index - 1) % 24 + 1
-        if col >= PLAYABLE_START and col <= 16 then
-            local x = (col - PLAYABLE_START) * squareSize
+        if col >= playableStart and col <= 16 then
+            local x = (col - playableStart) * squareSize
             local y = (row - 1) * squareSize
             if mouseX >= x and mouseX < x + squareSize and mouseY >= y and mouseY < y + squareSize then
                 return piece
@@ -29,7 +29,7 @@ end
 function PieceSelection:highlightSelectedPiece(piece)
     local row = math.floor((piece.index - 1) / 24) + 1
     local col = (piece.index - 1) % 24 + 1
-    local x = (col - PLAYABLE_START) * squareSize
+    local x = (col - playableStart) * squareSize
     local y = (row - 1) * squareSize
 
     love.graphics.setColor(0, 1, 0, 0.5)
@@ -40,16 +40,16 @@ end
 
 function PieceSelection:getClickedIndex(mouseX, mouseY)
     assert(squareSize, "squareSize is nil")
-    assert(PLAYABLE_START, "PLAYABLE_START is nil")
-    assert(PLAYABLE_END, "PLAYABLE_END is nil")
-    assert(ROWS, "ROWS is nil")
-    assert(COLUMNS, "COLUMNS is nil")
-    local col = math.floor(mouseX / squareSize) + PLAYABLE_START
+    assert(playableStart, "PLAYABLE_START is nil")
+    assert(playableEnd, "PLAYABLE_END is nil")
+    assert(rows, "ROWS is nil")
+    assert(columns, "COLUMNS is nil")
+    local col = math.floor(mouseX / squareSize) + playableStart
     local row = math.floor(mouseY / squareSize) + 1
 
     -- Vérifier si la case est dans les limites jouables
-    if col >= PLAYABLE_START and col <= PLAYABLE_END and row >= 1 and row <= ROWS then
-        return (row - 1) * COLUMNS + col -- Calculer l'index linéaire
+    if col >= playableStart and col <= playableEnd and row >= 1 and row <= rows then
+        return (row - 1) * columns + col -- Calculer l'index linéaire
     end
     return nil
 end

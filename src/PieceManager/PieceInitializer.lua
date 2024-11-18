@@ -48,6 +48,7 @@ end
 function PieceInitializer:getPieceAtIndex(pieces, index)
     for _, piece in ipairs(pieces) do
         if piece.index == index then
+            print(piece.index, "is", piece.type)
             return piece
         end
     end

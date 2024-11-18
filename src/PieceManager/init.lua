@@ -16,17 +16,16 @@ function PieceManager:drawPieces()
     PieceRenderer:drawPieces(self.pieces)
 end
 
-function PieceManager:movePiece(piece, destinationIndex, updateLastMove)
-    return PieceMover:movePiece(self.pieces, piece, destinationIndex, updateLastMove)
-end
-
-function PieceManager:getPieceAtIndex(index)
-    -- Déléguer la recherche au module `PieceInitializer`
-    return PieceInitializer:getPieceAtIndex(self.pieces, index)
+function PieceManager:movePiece(piece, destinationIndex)
+    return PieceMover:movePiece(self.pieces, piece, destinationIndex)
 end
 
 function PieceManager:getBoardState()
     return self.pieces
+end
+
+function PieceManager:getPieceAtIndex(index)
+    return PieceInitializer:getPieceAtIndex(self.pieces, index)
 end
 
 return PieceManager
