@@ -2,7 +2,7 @@ local PieceMover = {}
 local PieceInitializer = require("src.PieceManager.PieceInitializer")
 
 
-function PieceMover:isValidMove(pieces, piece, destinationIndex)
+function PieceMover:isPseudoLegal(pieces, piece, destinationIndex)
     local targetPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
     if targetPiece and targetPiece.color == piece.color then
         return false -- Mouvement invalide : occupée par pièce alliée
@@ -32,12 +32,14 @@ function PieceMover:isValidMove(pieces, piece, destinationIndex)
       return self:isValidKingMove(pieces, piece, destinationIndex)
   end
 
-    return true -- Mouvement valide
+    return true -- Valid move
 end
 
 function PieceMover:movePiece(pieces, piece, destinationIndex)
     print(pieces, destinationIndex)
-    if not self:isValidMove(pieces, piece, destinationIndex) then
+    if not self:isPseudoLegal(pieces, piece, destinationIndex) then
+        return false
+    elseif not self:isLegal(pieces, piece, destinationIndex) then
         return false
     end
 
@@ -219,6 +221,54 @@ function PieceMover:isValidKingMove(pieces, piece, destinationIndex)
 
     return false
 end
+
+function PieceMover:isLegal(pieces, piece, destinationIndex)
+    -- Sauvegarder l'état initial
+    local originalStartIndex = piece.index
+    local pseudoTakenPiece = PieceInitializer:getPieceAtIndex(pieces, destinationIndex)
+
+    -- Simule le mouvement
+    piece.index = destinationIndex
+    if pseudoTakenPiece ~= nil then
+        pseudoTakenPiece.index = nil -- Retire temporairement la pièce capturée
+    end
+
+    -- Vérifie si le roi est en échec après le mouvement
+    local isKingInCheck = self:isKingInCheck(pieces, piece.color)
+
+    -- Annule le mouvement (restaure l'état initial)
+    piece.index = originalStartIndex
+    if pseudoTakenPiece ~= nil then
+        pseudoTakenPiece.index = destinationIndex
+    end
+
+    -- Retourne vrai si le roi n'est pas en échec
+    return not isKingInCheck
+end
+
+
+function PieceMover:isKingInCheck(pieces, kingColor)
+    -- Trouver la position du roi de la couleur donnée
+    local kingPosition = nil
+    for _, piece in ipairs(pieces) do
+        if piece.type == "king" and piece.color == kingColor then
+            kingPosition = piece.index
+            break
+        end
+    end
+
+    -- Vérifie si une pièce ennemie peut atteindre la position du roi
+    for _, piece in ipairs(pieces) do
+        if piece.color ~= kingColor then
+            if self:isPseudoLegal(pieces, piece, kingPosition) then
+                return true -- King in check
+            end
+        end
+    end
+
+    return false -- King not in check
+end
+
 
 return PieceMover
 
