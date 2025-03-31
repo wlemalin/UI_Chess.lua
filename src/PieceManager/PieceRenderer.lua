@@ -1,9 +1,11 @@
 
 local PieceRenderer = {}
 
+local constants = require("src.constants")
+
 local pieceImages = {}
-local squareSize = 80
-local PLAYABLE_START = 9
+local squareSize = constants.squareSize
+local PLAYABLE_START = constants.playableStart
 
 function PieceRenderer:initializeImages()
     pieceImages = {

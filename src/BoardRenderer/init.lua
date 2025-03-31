@@ -1,13 +1,15 @@
 local BoardRenderer = {}
 
-local squareSize = 80
-local lightColor = {1, 0.9, 0.8} -- white square
-local darkColor = {0.6, 0.4, 0.2} -- dark square
+local constants = require("src.constants")
 
-local ROWS = 8
-local COLUMNS = 24 -- Include padding
-local PLAYABLE_START = 9
-local PLAYABLE_END = 16
+local squareSize = constants.squareSize
+local lightColor = constants.lightColor
+local darkColor = constants.darkColor
+
+local ROWS = constants.rows
+local COLUMNS = constants.columns
+local PLAYABLE_START = constants.playableStart
+local PLAYABLE_END = constants.playableEnd
 
 function BoardRenderer:initialize()
     self.rows = ROWS

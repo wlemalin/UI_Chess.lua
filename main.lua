@@ -3,6 +3,8 @@ local BoardRenderer = require("src.BoardRenderer.init")
 local PieceManager = require("src.PieceManager.init")
 local TurnManager = require("src.TurnManager.init")
 local UIManager = require("src.UIManager.init")
+local GameAudio = require("src.UIManager.GameAudio")
+
 
 -- main.lua
 
@@ -11,6 +13,7 @@ function love.load()
     PieceManager:initialize()
     UIManager:initialize()
     TurnManager:initialize()
+    GameAudio:load()
 end
 
 function love.draw()
@@ -49,6 +52,7 @@ function love.mousepressed(mouseX, mouseY, button)
 
     local moveSuccess = PieceManager:movePiece(selectedPiece, destinationIndex)
     if moveSuccess then
+        GameAudio:playRandomMoveSound()
         TurnManager:changeTurn()
     else
         print("Invalid move!")

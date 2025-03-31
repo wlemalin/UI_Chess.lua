@@ -1,8 +1,11 @@
 
 local PieceInitializer = {}
 
+local constants = require("src.constants")
 
-local COLUMNS = 24 -- Include padding
+local COLUMNS = constants.columns
+local PLAYABLE_START = constants.playableStart --9
+local PLAYABLE_END = constants.playableEnd --16
 
 -- Convert 2D to linear index
 local function toIndex(row, col)
@@ -13,7 +16,7 @@ end
 function PieceInitializer:initializePieces()
     local pieces = {}
 
-    for col = 9, 16 do
+    for col = PLAYABLE_START, PLAYABLE_END do
         table.insert(pieces, {type = "pawn", color = "white", index = toIndex(2, col)})
     end
     table.insert(pieces, {type = "rook", color = "white", index = toIndex(1, 9)})
@@ -25,7 +28,7 @@ function PieceInitializer:initializePieces()
     table.insert(pieces, {type = "knight", color = "white", index = toIndex(1, 15)})
     table.insert(pieces, {type = "rook", color = "white", index = toIndex(1, 16)})
 
-    for col = 9, 16 do
+    for col = PLAYABLE_START, PLAYABLE_END do
         table.insert(pieces, {type = "pawn", color = "black", index = toIndex(7, col)})
     end
 
